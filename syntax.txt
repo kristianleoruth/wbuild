@@ -28,13 +28,14 @@ This is a simple custom markup language (inspired by Markdown). The script \text
 
 To convert a text document to an html file, run the command:
 [code][
-# Pass arguments:
-# mode: light or dark, optional
-# view: open website after generation, optional
+// Pass arguments:
+// mode: light or dark, optional
+// view: open website after generation, optional
 python3 wbuild.py "path_to_doc.txt" "output_path.html" -mode -view
-# Demo (build this website):
+// Demo (build this website):
 python3 wbuild.py
 ]
+Note that code blocks may have comments denoted by \textcode{//}, which are not supported in the markup language. Therefore comments should only be taken for illustration, not that they are "correct" to be there.
 
 For examples of the markup language, see the \showarg{examples}{label} section.
 
@@ -44,7 +45,7 @@ Created 5 March 2025 by \link{https://sites.google.com/view/kristian-ruth/home}{
 [section][notopmarg=False]
 Tags are formatted as \textcode{[tag_name]} and represent components of the site, e.g. a section, column, image, text, etc. The square brackets may be used for plain text when inside {} and part of a command argument, or when the brackets are escaped with \. 
 
-Definitions below of tags give the arguments and their default values for the given tag (omitting arguments from a tag results in default values being used). For example, \textcode{[section][align=justify, notopmarg=False]} is equivalent to \textcode{[section]} because the arguments given are the same as default.
+Definitions below of tags give the arguments and their default values for the given tag (omitting arguments from a tag results in default values being used). For example, \textcode{[section][align=justify, notopmarg=False]} is equivalent to \textcode{[section]} because the arguments given are the same as default. 
 
 Any tag may be passed a string argument \textcode{uid} (unique), which may be referenced in e.g. \link{#links_info}{links}. Additionally, a \textcode{class} argument may be passed to any tag.
 [subheader][label=Sections, uid=sections_info]
@@ -208,17 +209,17 @@ Definition:
 Example use:
 [code][
 [list][
-Unordered items, bulleted symbol:
+// Unordered items, bulleted symbol:
 *) First level unordered items
 **) Second level unordered items
 ***) Third level unordered items
 
-Unordered items, no symbol:
+// Unordered items, no symbol:
 -) First level unordered items
 --) Second level unordered items
 ---) Third level unordered items
 
-Ordered items, int(.int.int) symbol:
+// Ordered items, int(.int.int) symbol:
 #) First level ordered items
 ##) Second level ordered items
 ###) Third level ordered items
@@ -234,8 +235,8 @@ Definition:
 [code][{
     "type": "img",
     "args": {
-        "src": "", # "/dir_path/image.png"
-        "maxwidth": "100%", # css value
+        "src": "", // "/dir_path/image.png"
+        "maxwidth": "100%", // css value
         "caption": "",
         "label": "",
         "italicize":True,
@@ -283,7 +284,7 @@ As we can see in figure \showarg{some_uid}{label}, ...
 \showarg{some_uid}{label} -> "1"
 
 [header][uid=some_header, label=Linked header]
-\showarg{some_header}{label} -> "Linked header" # this is a link to the header
+\showarg{some_header}{label} -> "Linked header" // this is a link to the header
 ]
 To have an image display the caption with preceding "Figure X: ", one could set the label to some number X, then set the caption as:
 [code][
@@ -335,7 +336,7 @@ Hello, world!
 
 Output \textcode{doc} dictionary:
 [code][
-# main section/doc
+// main section/doc
 {
     'type': 'section', 
     'id': 1741290966346854000, 
@@ -347,7 +348,7 @@ Output \textcode{doc} dictionary:
         'uid': ''
     }, 
     'data': [
-        # section created by [section] tag
+        // section created by [section] tag
         {
             'type': 'section', 
             'id': 1741290966346910000, 
@@ -359,7 +360,7 @@ Output \textcode{doc} dictionary:
                 'uid': ''
             }, 
             'data': [
-                # Text automatically created from 'Hello, world!'
+                // Text automatically created from 'Hello, world!'
                 {
                     'type': 'text', 
                     'id': 1741290966347005000, 
@@ -426,11 +427,11 @@ This is a simple custom markup language (inspired by Markdown). The script \text
 
 To convert a text document to an html file, run the command:
 [code][
-# Pass arguments:
-# mode: light or dark, optional
-# view: open website after generation, optional
+// Pass arguments:
+// mode: light or dark, optional
+// view: open website after generation, optional
 python3 wbuild.py "path_to_doc.txt" "output_path.html" -mode -view
-# Demo (build this website):
+// Demo (build this website):
 python3 wbuild.py
 ]
 
