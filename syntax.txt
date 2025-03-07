@@ -1,0 +1,506 @@
+[section]
+[header][label=User guide]
+[subheader][label=Table of Contents, uid=toc]
+[list][
+#) \showarg{getting_started}{label}
+#) \showarg{tags_info}{label}
+##) \showarg{sections_info}{label}
+##) \showarg{columns_info}{label}
+##) \showarg{headers_info}{label}
+##) \showarg{text_info}{label}
+##) \showarg{code_info}{label}
+##) \showarg{lists_info}{label}
+##) \showarg{imgs_info}{label}
+#) \showarg{cmd_info}{label}
+##) \link{#cmd_info}{Commands}
+###) \showarg{cmds_txtappearance}{label}
+###) \showarg{cmds_showargs}{label}
+###) \showarg{labels_info}{label}
+###) \showarg{inline_code_cmd}{label}
+##) \showarg{all_cmds}{label}
+#) \showarg{examples}{label}
+##) \showarg{hello_world_ex}{label}
+##) \showarg{this_file_example}{label}
+]
+
+[subheader][numbered=True,label=Getting started, uid=getting_started]
+This is a simple custom markup language (inspired by Markdown). The script \textcode{wbuild.py} is a converter allowing one to quickly build a site from a markup file. The structure of the markup document is a series of tags with text in between. These tags represent a section, image, text, header, subheader, etc, and are supplemented with arguments given in extra square brackets following the tag.
+
+To convert a text document to an html file, run the command:
+[code][
+# Pass arguments:
+# mode: light or dark, optional
+# view: open website after generation, optional
+python3 wbuild.py "path_to_doc.txt" "output_path.html" -mode -view
+# Demo (build this website):
+python3 wbuild.py
+]
+
+For examples of the markup language, see the \showarg{examples}{label} section.
+
+Created 5 March 2025 by \link{https://sites.google.com/view/kristian-ruth/home}{Kristan Leo Ruth} <krirut@kth.se, kristianleoruth@gmail.com>.
+
+[header][label=Tags, uid=tags_info]
+[section][notopmarg=False]
+Tags are formatted as \textcode{[tag_name]} and represent components of the site, e.g. a section, column, image, text, etc. The square brackets may be used for plain text when inside {} and part of a command argument, or when the brackets are escaped with \. 
+
+Definitions below of tags give the arguments and their default values for the given tag (omitting arguments from a tag results in default values being used). For example, \textcode{[section][align=justify, notopmarg=False]} is equivalent to \textcode{[section]} because the arguments given are the same as default.
+
+Any tag may be passed a string argument \textcode{uid} (unique), which may be referenced in e.g. \link{#links_info}{links}. Additionally, a \textcode{class} argument may be passed to any tag.
+[subheader][label=Sections, uid=sections_info]
+The document (\textcode{doc}) is a special \textcode{[section]} containing a collection of \textcode{[section]} tags. After establishing a section with a tag, any following tags will belong to the section, until a new secton is started. Other than the \textcode{doc}, sections may not hold \textcode{[section]} tags. Adding a new \textcode{[section]} tag will end the previous section.
+[section][notopmarg=True]
+[column][notopmarg=True]
+Definition:
+[code][
+{
+    "type": "section",
+    "args": {
+        "align":"justify",
+        "bg": 1,
+        "class": "",
+        "notopmarg": False,
+        "uid": "",
+    }
+}]
+[column][notopmarg=True]
+Example use:
+[code][
+[section]
+[header][label=This is a header]
+This text will be part of the section.
+
+[section][align=center]
+[header][label=New centered section]
+This is a new section, the content within is aligned to the center.
+]
+[section]
+[subheader][label=Columns, uid=columns_info]
+The tag \textcode{[column]} allows the user to define a new column. Adding column tags will automatically convert the parent section into a grid layout based on the number of columns (maximum 3). The column may also hold a list of items, so new tags will be children of the column. 
+
+Creating a new column will end the previous one, as with sections. Remember that sections cannot be children of sections, only of the \textcode{doc}.
+
+[section][notopmarg=True]
+[column][notopmarg=True]
+
+Definition:
+[code][{
+    "type": "column",
+    "args": {
+        "align":"justify",
+        "bg": 1,
+        "class": "",
+        "notopmarg": True,
+        "uid": "",
+    }
+}]
+[column][notopmarg=True]
+Example use:
+[code][
+[section]
+[column]
+This text will appear on the left column
+[column]
+This text will appear on the right column
+[section]
+This will start a new section
+]
+
+[section]
+[subheader][label=Header/subheader, uid=headers_info]
+Use \textcode{[header]}, \textcode{[subheader]}, or \textcode{[subsubheader]} with a second tag identifying the \textcode{label} argument to create headers and subheaders of various sizes.
+[section]
+[column]
+Definition (shared among sub/headers except for \textcode{"type"}):
+[code][{
+    "type": "header",
+    "args": {
+        "label": "",
+        "class": "",
+        "notopmarg": False,
+        "uid": "",
+    }
+}]
+[column]
+Example use:
+[code][
+[header][label=Some header text]
+[subheader][label=Subheader text]
+[subsubheader][label=Even smaller subheader]
+]
+
+[section]
+[subheader][label=Text, uid=text_info]
+Text that is not in unescaped square brackets, i.e. \[\] is automatically added to the preceding section/column. To pass arguments to the text tag, declare a \textcode{[text]} tag and then pass the arguments.
+
+[section]
+[column]
+Definition:
+[code][{
+    "type": "text",
+    "args": {
+        "align": "justify",
+        "bg": 1,
+        "class": "",
+        "notopmarg": False,
+        "uid": "",
+    },
+}]
+[column]
+Example use:
+[code][
+[section]
+This text will automatically be in the above declared section.
+\italic{This text will be italic.}
+\link{https://www.google.com/}{This text will be a link to Google.}
+\bold{This text will be bold} and this text won't be.
+\textcode{This text will look like code}
+
+[text][class=some_class some_other_class]
+This text will be separate from the earlier text and will have classes 'some_class' and 'some_other_class'
+]
+
+[section]
+[subheader][label=Displaying code, uid=code_info]
+Code can be displayed inline or in a block on a new line. Use the \link{#inline_code_cmd}{textcode command} or the \textcode{[code]} tag. For code blocks use the format \textcode{[code][args: optional][your_code]}.
+
+[section][column]
+Definition:
+[code][{
+    "type": "code",
+    "args": {
+        "align": "left",
+        "class": "",
+        "notopmarg": False,
+        "uid": "",
+    }
+}]
+[column]
+Example use:
+[code][
+[section]
+[code][
+This code will be displayed in a block.
+
+More lines can be displayed this way.
+]
+]
+
+[section]
+[subheader][label=Lists, uid=lists_info]
+Lists can have ordered and unordered items. Ordered items are numbered (e.g. 1.2.1) and unordered items are bulleted or have no symbol. Use argument \textcode{orderall=True} to count unordered items in the ordered item numbering.  \textcode{baseoffset} determines the offset (number of spaces before symbol) for first level items and \textcode{lvloffset} is the added offset per level of depth in the list. Lists have a maximum depth of 3, i.e. up to three indicators (\textcode{*/-/#}) before the closing parenthesis. An example of a list is the \link{#toc}{table of contents.}
+
+[section][notopmarg=True]
+[column]
+Definition:
+[code][{
+    "type": "list",
+    "args": {
+        "orderall": False,
+        "lvloffset": 4,
+        "baseoffset": 2,
+        "class": "",
+        "notopmarg": False,
+        "uid": "",
+    }
+}]
+[column]
+Example use:
+[code][
+[list][
+Unordered items, bulleted symbol:
+*) First level unordered items
+**) Second level unordered items
+***) Third level unordered items
+
+Unordered items, no symbol:
+-) First level unordered items
+--) Second level unordered items
+---) Third level unordered items
+
+Ordered items, int(.int.int) symbol:
+#) First level ordered items
+##) Second level ordered items
+###) Third level ordered items
+]
+]
+[section]
+[subheader][label=Images, uid=imgs_info]
+Images and gifs may be added by the \textcode{[img]} tag and the path is provided as the \textcode{src} argument. These can be attached to sections and columns. Caption may be added via the \textcode{caption} argument. Captions may take the same commands as text (i.e. links, bold, italic, textcode, etc.).
+
+[section][notopmarg=True]
+[column]
+Definition:
+[code][{
+    "type": "img",
+    "args": {
+        "src": "", # "/dir_path/image.png"
+        "maxwidth": "100%", # css value
+        "caption": "",
+        "label": "",
+        "italicize":True,
+        "class":"",
+        "notopmarg":False,
+        "uid":"",
+    }
+}]
+[column]
+Example use:
+[code][
+[section][align=center]
+[img][
+    src=./path_to_img.gif, 
+    maxwidth=50%, 
+    caption=This caption and image will be centered due to the section argument.
+]
+]
+
+[section]
+[subheader][label=In-text commands, uid=cmd_info]
+Commands are given inside text meant to be displayed in tags (excluding \textcode{[code]}). This includes \textcode{[text]}, \textcode{[subsub/sub/header]}, \textcode{[img]}, \textcode{[list]}, etc. Commands are given in the form \textcode{\keyword{arg1}{arg2}} with one or two arguments depending on the command.
+
+[subsubheader][label=Modifying text appearance, uid=cmds_txtappearance]
+\bold{Boldness} and \italic{italics} can be applied to text via \textcode{\bold{}} and \textcode{\italic{}}:
+
+[code][
+\italic{This text will be italic,} and \bold{this text will be bold.}
+]
+
+[subsubheader][label=Display arguments, uid=cmds_showargs]
+To display an argument within text, use the \textcode{\showargs{uid}{arg}} command. This will replace the command text with the (to string) value of the argument.
+
+[code][
+[section][uid=ex1, notopmarg=True]
+\showarg{ex1}{notopmarg} -> "True"
+]
+
+[subsubheader][label=Referencing labels, uid=labels_info]
+It's possible to reference some image as, for example, figure 1 if the image's \textcode{label} argument is set appropriately. This will automatically apply a link to that image with the text being the value of the label argument. This goes for any tag that accepts a \textcode{label} argument. It is recommended to keep labels to numbers if they are for figures (as show below), except for headers and subheaders as the label determines the text displayed. Labels do not need to be unique.
+
+[code][
+[img][src=some_path.png, uid=some_uid, label=1]
+As we can see in figure \showarg{some_uid}{label}, ...
+\showarg{some_uid}{label} -> "1"
+
+[header][uid=some_header, label=Linked header]
+\showarg{some_header}{label} -> "Linked header" # this is a link to the header
+]
+To have an image display the caption with preceding "Figure X: ", one could set the label to some number X, then set the caption as:
+[code][
+[img][
+uid=example_fig, 
+label=1, 
+caption=Figure \showarg{img_uid}{label}: your caption.
+] -> caption=Figure 1: your caption.
+]
+
+[subsubheader][label=Linking to sections, uid=links_info]
+Link to parent section \link{#cmd_info}{In-text commands}. In-page references to other tags are done by passing a string \textcode{uid} argument to the tag, then passing \textcode{#uid} as the link.
+
+[code][
+[section][uid=link_to]
+\link{#link_to}{This is a link to this section.}
+]
+
+[subsubheader][label=Inline code, uid=inline_code_cmd]
+To display \textcode{code} inline, use the \textcode{\textcode{your code}} command.
+
+[code][
+[section]
+This text is part of the section and \textcode{this code is inlined.}
+]
+
+[subsubheader][label=List of all commands and arguments, uid=all_cmds]
+Arguments can be optional if listed as \textcode{{arg: opt.}}.
+[code][
+\bold{text to bold}
+\italic{text to italicize}
+\link{url}{text: opt.}
+\textcode{inline code}
+\showarg{uid}{argname}
+]
+
+
+[section]
+[header][label=Examples, uid=examples]
+[section][notopmarg=True]
+[subheader][label=Hello world, uid=hello_world_ex]
+
+helloworld.txt:
+
+[code][
+[section]
+Hello, world!
+]
+
+Output \textcode{doc} dictionary:
+[code][
+# main section/doc
+{
+    'type': 'section', 
+    'id': 1741290966346854000, 
+    'args': {
+        'align': 'justify', 
+        'bg': 1, 
+        'class': '', 
+        'notopmarg': False, 
+        'uid': ''
+    }, 
+    'data': [
+        # section created by [section] tag
+        {
+            'type': 'section', 
+            'id': 1741290966346910000, 
+            'args': {
+                'align': 'justify', 
+                'bg': 1, 
+                'class': '', 
+                'notopmarg': False, 
+                'uid': ''
+            }, 
+            'data': [
+                # Text automatically created from 'Hello, world!'
+                {
+                    'type': 'text', 
+                    'id': 1741290966347005000, 
+                    'args': {
+                        'align': 'justify', 
+                        'bg': 1, 
+                        'class': '', 
+                        'notopmarg': False, 
+                        'uid': ''
+                    }, 
+                    'data': 'Hello, world!'
+                }
+            ]
+        }
+    ]
+}
+]
+
+Output (not including \textcode{<head>}):
+[section]
+[code][
+<html>
+<body class="light-mode-bg1">
+    <div id="1741356188725032000" class="light-mode-bg1 columns1  " style="text-align:justify;">
+        <div id="1741356188725086000" class="light-mode-bg1 columns1  " style="text-align:justify;">
+            <p class="" id="1741356188725182000">Hello, world!</p>
+        </div>
+    </div>
+</body>
+</html>
+]
+
+[section]
+[subheader][label=Example of this site, uid=this_file_example]
+Up to \showarg{columns_info}{label}:
+[code][
+[section]
+[header][label=User guide]
+[subheader][label=Table of Contents, uid=toc]
+[list][
+#) \showarg{getting_started}{label}
+#) \showarg{tags_info}{label}
+##) \showarg{sections_info}{label}
+##) \showarg{columns_info}{label}
+##) \showarg{headers_info}{label}
+##) \showarg{text_info}{label}
+##) \showarg{code_info}{label}
+##) \showarg{lists_info}{label}
+##) \showarg{imgs_info}{label}
+#) \showarg{cmd_info}{label}
+##) \link{#cmd_info}{Commands}
+###) \showarg{cmds_txtappearance}{label}
+###) \showarg{cmds_showargs}{label}
+###) \showarg{labels_info}{label}
+###) \showarg{inline_code_cmd}{label}
+##) \showarg{all_cmds}{label}
+#) \showarg{examples}{label}
+##) \showarg{hello_world_ex}{label}
+##) \showarg{this_file_example}{label}
+]
+
+[subheader][numbered=True,label=Getting started, uid=getting_started]
+This is a simple custom markup language (inspired by Markdown). The script \textcode{wbuild.py} is a converter allowing one to quickly build a site from a markup file. The structure of the markup document is a series of tags with text in between. These tags represent a section, image, text, header, subheader, etc, and are supplemented with arguments given in extra square brackets following the tag.
+
+To convert a text document to an html file, run the command:
+[code][
+# Pass arguments:
+# mode: light or dark, optional
+# view: open website after generation, optional
+python3 wbuild.py "path_to_doc.txt" "output_path.html" -mode -view
+# Demo (build this website):
+python3 wbuild.py
+]
+
+For examples of the markup language, see the \showarg{examples}{label} section.
+
+Created 5 March 2025 by \link{https://sites.google.com/view/kristian-ruth/home}{Kristan Leo Ruth} <krirut@kth.se, kristianleoruth@gmail.com>.
+
+[header][label=Tags, uid=tags_info]
+[section][notopmarg=False]
+Tags are formatted as \textcode{[tag_name]} and represent components of the site, e.g. a section, column, image, text, etc. The square brackets may be used for plain text when inside {} and part of a command argument, or when the brackets are escaped with \. 
+
+Definitions below of tags give the arguments and their default values for the given tag (omitting arguments from a tag results in default values being used). For example, \textcode{[section][align=justify, notopmarg=False]} is equivalent to \textcode{[section]} because the arguments given are the same as default.
+
+Any tag may be passed a string argument \textcode{uid} (unique), which may be referenced in e.g. \link{#links_info}{links}. Additionally, a \textcode{class} argument may be passed to any tag.
+[subheader][label=Sections, uid=sections_info]
+The document (\textcode{doc}) is a special \textcode{[section]} containing a collection of \textcode{[section]} tags. After establishing a section with a tag, any following tags will belong to the section, until a new secton is started. Other than the \textcode{doc}, sections may not hold \textcode{[section]} tags. Adding a new \textcode{[section]} tag will end the previous section.
+[section][notopmarg=True]
+[column][notopmarg=True]
+Definition:
+[code][
+{
+    "type": "section",
+    "args": {
+        "align":"justify",
+        "bg": 1,
+        "class": "",
+        "notopmarg": False,
+        "uid": "",
+    }
+}]
+[column][notopmarg=True]
+Example use:
+[code][
+[section]
+[header][label=This is a header]
+This text will be part of the section.
+
+[section][align=center]
+[header][label=New centered section]
+This is a new section, the content within is aligned to the center.
+]
+[section]
+[subheader][label=Columns, uid=columns_info]
+The tag \textcode{[column]} allows the user to define a new column. Adding column tags will automatically convert the parent section into a grid layout based on the number of columns (maximum 3). The column may also hold a list of items, so new tags will be children of the column. 
+
+Creating a new column will end the previous one, as with sections. Remember that sections cannot be children of sections, only of the \textcode{doc}.
+
+[section][notopmarg=True]
+[column][notopmarg=True]
+
+Definition:
+[code][{
+    "type": "column",
+    "args": {
+        "align":"justify",
+        "bg": 1,
+        "class": "",
+        "notopmarg": True,
+        "uid": "",
+    }
+}]
+[column][notopmarg=True]
+Example use:
+[code][
+[section]
+[column]
+This text will appear on the left column
+[column]
+This text will appear on the right column
+[section]
+This will start a new section
+]
+]
