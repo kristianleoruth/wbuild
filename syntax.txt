@@ -188,7 +188,7 @@ More lines can be displayed this way.
 
 [section]
 [subheader][label=Lists, uid=lists_info]
-Lists can have ordered and unordered items. Ordered items are numbered (e.g. 1.2.1) and unordered items are bulleted or have no symbol. Use argument \textcode{orderall=True} to count unordered items in the ordered item numbering.  \textcode{baseoffset} determines the offset (number of spaces before symbol) for first level items and \textcode{lvloffset} is the added offset per level of depth in the list. Lists have a maximum depth of 3, i.e. up to three indicators (\textcode{*/-/#}) before the closing parenthesis. An example of a list is the \link{#toc}{table of contents.}
+Lists can have ordered and unordered items. Ordered items are numbered (e.g. 1.2.1, see \showarg{toc}{label}) and unordered items are bulleted or have no symbol. Use argument \textcode{orderall=True} to count unordered items in the ordered item numbering.  \textcode{baseoffset} determines the offset (number of spaces before symbol) for first level items and \textcode{lvloffset} is the added offset per level of depth in the list. Lists have a maximum depth of 3, i.e. up to three indicators (\textcode{*/-/#}) before the closing parenthesis.
 
 [section][notopmarg=True]
 [column]
