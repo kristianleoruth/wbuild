@@ -48,6 +48,8 @@ Tags are formatted as \textcode{[tag_name]} and represent components of the site
 Definitions below of tags give the arguments and their default values for the given tag (omitting arguments from a tag results in default values being used). For example, \textcode{[section][align=justify, notopmarg=False]} is equivalent to \textcode{[section]} because the arguments given are the same as default. 
 
 Any tag may be passed a string argument \textcode{uid} (unique), which may be referenced in e.g. \link{#links_info}{links}. Additionally, a \textcode{class} argument may be passed to any tag.
+
+A button is automatically added to the top right to allow switching between dark and light theme.
 [subheader][label=Sections, uid=sections_info]
 The document (\textcode{doc}) is a special \textcode{[section]} containing a collection of \textcode{[section]} tags. After establishing a section with a tag, any following tags will belong to the section, until a new secton is started. Other than the \textcode{doc}, sections may not hold \textcode{[section]} tags. Adding a new \textcode{[section]} tag will end the previous section.
 [section][notopmarg=True]
@@ -174,6 +176,7 @@ Definition:
         "class": "",
         "notopmarg": False,
         "uid": "",
+        "bg": 2,
     }
 }]
 [column]

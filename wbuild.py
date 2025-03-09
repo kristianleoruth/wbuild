@@ -4,6 +4,8 @@ import html as ht
 import sys
 import os
 
+scr_dir = os.path.dirname(os.path.abspath(__file__))
+
 TYPES = [
     {
         "type": "section",
@@ -72,6 +74,7 @@ TYPES = [
             "class": "",
             "notopmarg": False,
             "uid": "",
+            "bg": 2
         }
     },
     {
@@ -145,9 +148,9 @@ def _is_sec_or_col(part: dict) -> bool:
 def _is_sec(part: dict) -> bool:
     return part["type"] == "section"
 
-def _classes_from_argdict(part: dict, mode="dark") -> str:
+def _classes_from_argdict(part: dict) -> str:
     argdict = part["args"]
-    bg = f"{mode}-mode-bg{argdict["bg"] if "bg" in argdict.keys() else 1}"
+    bg = f"bg{argdict["bg"] if "bg" in argdict.keys() else 1}"
     col = ""
     if _is_sec_or_col(part):
         n_cols = len([_part for _part in part["data"] if _part["type"] == "column"])
@@ -175,7 +178,7 @@ def _html_from_header(header: dict, doc: dict) -> str:
 def _html_from_code(code: dict, mode="dark") -> str:
     datastr = code["data"]
     datastr = ht.escape(datastr).replace("\n", "<br>")
-    html = f"<div class='{_classes_from_argdict(code, mode)}'".replace(f"{mode}-mode-bg1", f"{mode}-mode-bg2")
+    html = f"<div class='{_classes_from_argdict(code)}' data-theme='{mode}'"
     html += f" id='{code["id"]}'>"
     html += f"<pre>{datastr}</pre></div>"
     return html
@@ -267,10 +270,11 @@ def _html_from_container(section: dict, mode="dark", doc:dict=None) -> str:
 
     html = f"<div id='{section["id"]}' "
     cols = [part for part in section["data"] if _is_sec(part)]
-    html += f"class='{_classes_from_argdict(section, mode)}' "
+    html += f"class='{_classes_from_argdict(section)}'"
+    html += f" data-theme='{mode}'"
     styles = _style_html_from_argdict(section["args"])
     if not _empty_or_ws_str(styles):
-        html += f"style='{styles}' "
+        html += f" style='{styles}' "
     html += ">"
     for part in section["data"]:
         match part["type"]:
@@ -289,16 +293,31 @@ def _html_from_container(section: dict, mode="dark", doc:dict=None) -> str:
     html += "</div>"
     return html
 
+def _get_html_theme_button(mode: str):
+    icon = f"./assets/moon.png"
+    if mode == "dark":
+        icon = f"./assets/sun.png"
+    html = "<button class='theme-btn' onclick='switchTheme()'>"
+    html += f"<img src='{icon}' alt='Toggle theme'></button>"
+    return html
+
+
+def _get_js_imports():
+    return f"<script src='./js/toggle_theme.js'></script>"
+
 def html_from_dict(section: dict, mode="dark") -> str:
     """
         args:
             - section: dictionary for a section or column object
     """
     html = "<!DOCTYPE html><html><head>"
-    html += "<style>" + open("/Users/kristianruth/Desktop/personal projects/wbuild/base_styles.css").read() + "</style>"
+    style_path = os.path.abspath(os.path.join(scr_dir, "base_styles.css"))
+    html += "<style>" + open(f"{style_path}").read() + "</style>"
     html += "</head>"
-    html += f"<body class='{mode}-mode-bg1'>"
+    html += f"<body class='bg1' data-theme='{mode}'x>"
     html += _html_from_container(section, mode)
+    html += _get_html_theme_button(mode)
+    html += _get_js_imports()
     html += "</body></html>"
     return html
 
@@ -700,7 +719,6 @@ def extract_text_cmds(text):
     return commands
 
 if __name__ == "__main__":
-    scr_dir = os.path.dirname(os.path.abspath(__file__))
     path_to_file = f"{scr_dir}/syntax.txt"
     save_path = f"{scr_dir}/output.html"
     mode = "light"
