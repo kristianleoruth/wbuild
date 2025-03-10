@@ -525,6 +525,7 @@ def apply_text_cmds(text: str, doc: dict) -> str:
                     list_txt += header["args"]["uid"] + "}{label}\n"
                 toc = create_doc_item("list", list_txt)
                 tochead = create_doc_item("subheader")
+                tochead["args"]["label"] = "Table of Contents"
                 tochead["args"]["uid"] = "tableofcontents"
                 text = text.replace(cdict["string"],
                     _html_from_header(tochead, doc) + _html_from_list(toc, doc)
