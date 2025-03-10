@@ -1,27 +1,7 @@
 [section]
-[header][label=User guide]
-[subheader][label=Table of Contents, uid=toc]
-[list][
-#) \showarg{getting_started}{label}
-#) \showarg{tags_info}{label}
-##) \showarg{sections_info}{label}
-##) \showarg{columns_info}{label}
-##) \showarg{headers_info}{label}
-##) \showarg{text_info}{label}
-##) \showarg{code_info}{label}
-##) \showarg{lists_info}{label}
-##) \showarg{imgs_info}{label}
-#) \showarg{cmd_info}{label}
-##) \link{#cmd_info}{Commands}
-###) \showarg{cmds_txtappearance}{label}
-###) \showarg{cmds_showargs}{label}
-###) \showarg{labels_info}{label}
-###) \showarg{inline_code_cmd}{label}
-##) \showarg{all_cmds}{label}
-#) \showarg{examples}{label}
-##) \showarg{hello_world_ex}{label}
-##) \showarg{this_file_example}{label}
-]
+[header][label=User guide, uid=top]
+
+\tableofcontents{}
 
 [subheader][numbered=True,label=Getting started, uid=getting_started]
 This is a simple custom markup language (inspired by Markdown). The script \textcode{wbuild.py} is a converter allowing one to quickly build a site from a markup file. The structure of the markup document is a series of tags with text in between. These tags represent a section, image, text, header, subheader, etc, and are supplemented with arguments given in extra square brackets following the tag. Download the necessary files \link{https://github.com/kristianleoruth/wbuild}{here.}
@@ -192,7 +172,7 @@ More lines can be displayed this way.
 
 [section]
 [subheader][label=Lists, uid=lists_info]
-Lists can have ordered and unordered items. Ordered items are numbered (e.g. 1.2.1, see \showarg{toc}{label}) and unordered items are bulleted or have no symbol. Use argument \textcode{orderall=True} to count unordered items in the ordered item numbering.  \textcode{baseoffset} determines the offset (number of spaces before symbol) for first level items and \textcode{lvloffset} is the added offset per level of depth in the list. Lists have a maximum depth of 3, i.e. up to three indicators (\textcode{*/-/#}) before the closing parenthesis.
+Lists can have ordered and unordered items. Ordered items are numbered (e.g. 1.2.1, see table of contents) and unordered items are bulleted or have no symbol. Use argument \textcode{orderall=True} to count unordered items in the ordered item numbering.  \textcode{baseoffset} determines the offset (number of spaces before symbol) for first level items and \textcode{lvloffset} is the added offset per level of depth in the list. Lists have a maximum depth of 3, i.e. up to three indicators (\textcode{*/-/#}) before the closing parenthesis.
 
 [section][notopmarg=True]
 [column]
@@ -261,7 +241,7 @@ Example use:
 
 [section]
 [subheader][label=In-text commands, uid=cmd_info]
-Commands are given inside text meant to be displayed in tags (excluding \textcode{[code]}). This includes \textcode{[text]}, \textcode{[subsub/sub/header]}, \textcode{[img]}, \textcode{[list]}, etc. Commands are given in the form \textcode{\keyword{arg1}{arg2}} with one or two arguments depending on the command.
+Commands are given inside text meant to be displayed in tags (excluding \textcode{[code]}). This includes \textcode{[text]}, \textcode{[subsub/sub/header]}, \textcode{[img]}, \textcode{[list]}, etc. Commands are given in the form \textcode{\keyword{arg1}{arg2}} with zero to two arguments depending on the command.
 
 [subsubheader][label=Modifying text appearance, uid=cmds_txtappearance]
 \bold{Boldness} and \italic{italics} can be applied to text via \textcode{\bold{}} and \textcode{\italic{}}:
@@ -322,6 +302,7 @@ Arguments can be optional if listed as \textcode{{arg: opt.}}.
 \link{url}{text: opt.}
 \textcode{inline code}
 \showarg{uid}{argname}
+\tableofcontents
 ]
 
 

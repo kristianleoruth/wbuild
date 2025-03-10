@@ -8,5 +8,8 @@ function switchTheme() {
         themeTo = cur == "light" ? "dark" : "light"
         el.setAttribute("data-theme", themeTo)
     }
-    switchThemeBtnIcon.setAttribute("src", themeTo == "dark"? "./assets/sun.png" : "./assets/moon.png")
+
+    switchThemeBtnIcon.setAttribute("src", themeTo == "dark"? 
+        "https://raw.githubusercontent.com/kristianleoruth/wbuild/refs/heads/main/assets/sun.png"
+         : "https://raw.githubusercontent.com/kristianleoruth/wbuild/refs/heads/main/assets/moon.png")
 }

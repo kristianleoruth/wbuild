@@ -294,16 +294,22 @@ def _html_from_container(section: dict, mode="dark", doc:dict=None) -> str:
     return html
 
 def _get_html_theme_button(mode: str):
-    icon = f"./assets/moon.png"
+    icon = f"https://raw.githubusercontent.com/kristianleoruth/wbuild/refs/heads/main/assets/moon.png"
     if mode == "dark":
-        icon = f"./assets/sun.png"
+        icon = f"https://raw.githubusercontent.com/kristianleoruth/wbuild/refs/heads/main/assets/sun.png"
     html = "<button class='theme-btn' onclick='switchTheme()'>"
     html += f"<img src='{icon}' alt='Toggle theme'></button>"
     return html
 
 
-def _get_js_imports():
-    return f"<script src='./js/toggle_theme.js'></script>"
+def _get_local_js_imports():
+    paths = [
+        os.path.join(scr_dir, "js/toggle_theme.js")
+    ]
+    imp = ""
+    for path in paths:
+        imp +=  f"<script>{open(path).read()}</script>"
+    return imp
 
 def html_from_dict(section: dict, mode="dark") -> str:
     """
@@ -317,7 +323,7 @@ def html_from_dict(section: dict, mode="dark") -> str:
     html += f"<body class='bg1' data-theme='{mode}'x>"
     html += _html_from_container(section, mode)
     html += _get_html_theme_button(mode)
-    html += _get_js_imports()
+    html += _get_local_js_imports()
     html += "</body></html>"
     return html
 
@@ -327,8 +333,6 @@ def create_doc_item(tag: str, data: str="") -> dict:
     type_info = TYPES[t_idx]
     if type_info["type"] == "section" or type_info["type"] == "column":
         data = []
-    # if type(data) == str:
-    #     data = escape(data)
     item_dict = {
         "type": type_info["type"],
         "id": time.time_ns(),
@@ -369,6 +373,17 @@ def process_args(argstr: str, last_added_item: dict) -> None:
             elif valtype == str:
                 val = val.strip()
             last_added_item["args"][arg] = val
+
+def search_tags(tags: list, section: dict) -> list:
+    found = []
+    for part in section["data"]:
+        if part["type"] in tags:
+            found.append(part)
+        if part["type"] == "section":
+            _found = search_tags(tags, part)
+            if _found is not None:
+                found += _found
+    return found if len(found) > 0 else None
 
 def search_uid(section: dict, uid: str) -> tuple | None:
     """
@@ -499,6 +514,22 @@ def apply_text_cmds(text: str, doc: dict) -> str:
                     repl_txt = f"<a class='link' href='#{res[0]["id"]}'>{repl_txt}</a>"
                 text = text.replace(cdict["string"],
                     repl_txt)
+            case "tableofcontents":
+                print(cdict)
+                allheads = search_tags(["header", "subheader", "subsubheader"], doc)
+                
+                list_txt = ""
+                for header in allheads:
+                    if header["args"]["uid"] == "": continue
+                    ind_amt = header["type"].count("sub") + 1
+                    list_txt += "#" * ind_amt + ") \\showarg{"
+                    list_txt += header["args"]["uid"] + "}{label}\n"
+                toc = create_doc_item("list", list_txt)
+                tochead = create_doc_item("subheader")
+                tochead["args"]["uid"] = "tableofcontents"
+                text = text.replace(cdict["string"],
+                    _html_from_header(tochead, doc) + _html_from_list(toc, doc)
+                )
     return text
 
 def restore_command(match):
@@ -736,8 +767,6 @@ if __name__ == "__main__":
     sample_txt = open(path_to_file, "r").read()
     save_to = open(save_path, "w")
     doc = build_doc_dict(sample_txt)
-    print(doc)
-    # for part in doc["data"]:
     html = html_from_dict(doc, mode=mode)
     save_to.write(html)
     if view_built_site:
