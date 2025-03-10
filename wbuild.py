@@ -515,7 +515,6 @@ def apply_text_cmds(text: str, doc: dict) -> str:
                 text = text.replace(cdict["string"],
                     repl_txt)
             case "tableofcontents":
-                print(cdict)
                 allheads = search_tags(["header", "subheader", "subsubheader"], doc)
                 
                 list_txt = ""

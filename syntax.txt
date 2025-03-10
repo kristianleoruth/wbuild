@@ -294,6 +294,9 @@ To display \textcode{code} inline, use the \textcode{\textcode{your code}} comma
 This text is part of the section and \textcode{this code is inlined.}
 ]
 
+[subsubheader][label=Generating table of contents, uid=toc_cmd]
+Use \textcode{\tableofcontents} in order to generate a Table of Contents based on the document. It will automatically collect all headers, subheaders, and subsubheaders and list them in order of appearance. Headers without \textcode{uid} argument set are not included. In this way the user may control what appears in the table.
+
 [subsubheader][label=List of all commands and arguments, uid=all_cmds]
 Arguments can be optional if listed as \textcode{{arg: opt.}}.
 [code][
