@@ -1,7 +1,7 @@
 [section]
 [header][label=User guide, uid=top]
 
-\tableofcontents{}
+\tableofcontents
 
 [subheader][numbered=True,label=Getting started, uid=getting_started]
 This is a simple custom markup language (inspired by Markdown). The script \textcode{wbuild.py} is a converter allowing one to quickly build a site from a markup file. The structure of the markup document is a series of tags with text in between. These tags represent a section, image, text, header, subheader, etc, and are supplemented with arguments given in extra square brackets following the tag. Download the necessary files \link{https://github.com/kristianleoruth/wbuild}{here.}
