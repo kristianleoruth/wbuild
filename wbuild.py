@@ -320,8 +320,8 @@ def _html_from_bq(part: dict[str, Any], mode=Literal['dark', 'light']) -> str:
     datastr = ht.escape(datastr).replace("\n", "<br>")
     if part['args']['italicize']:
         datastr = '<i>' + datastr + '</i>'
-    html = f"<blockquote class='{_classes_from_argdict(part)}' data-theme='{mode}'"
-    html += f">{datastr}</blockquote>"
+    html = f"<blockquote class='{_classes_from_argdict(part)}' data-theme='{mode}' "
+    html += f"style='{_style_html_from_argdict(part['args'])}'>{datastr}</blockquote>"
     return html
 
 def _html_from_text(part: dict[str, Any], doc: dict[str, Any]) -> str:

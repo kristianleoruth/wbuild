@@ -243,7 +243,7 @@ Example use:
 [section]
 [subheader][label=Blockquotes, uid=bqs_info]
 Blockquotes can be added using \textcode{[bq]}. 
-[bq][
+[bq][notopmarg=True][
     This text is indented using <blockquote>
 ]
 
