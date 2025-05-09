@@ -3,6 +3,7 @@ import time
 import html as ht
 import sys
 import os
+from typing import Optional, Literal, Any
 
 scr_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -101,8 +102,24 @@ TYPES = [
             "uid":"",
         }
     },
+    {
+        "type": "bq", # blockquote
+        "args": {
+            "label": "",
+            "italicize": False,
+            "class": "",
+            "notopmarg": False,
+            "uid": "",
+        }
+    }
 ]
 def build_doc_dict(txt: str) -> dict:
+    """
+    Build dictionary represntation of code found in `txt`
+    Params:
+    - txt: wbuild code
+    Returns: Dictionary
+    """
     global TYPES
     last_added_item = None
     parts = extract_top_level_tags(txt)
@@ -129,7 +146,13 @@ def build_doc_dict(txt: str) -> dict:
 
     return doc
 
-def _style_html_from_argdict(argdict: dict) -> str:
+def _style_html_from_argdict(argdict: dict[str, Any]) -> str:
+    """
+    Get CSS styling from `argdict`
+    Params:
+    - argdict: dictionary of arguments
+    Returns: CSS styling string
+    """
     html = ""
     for key in argdict.keys():
         match key:
@@ -142,15 +165,24 @@ def _style_html_from_argdict(argdict: dict) -> str:
                     html += "margin-top: 0px;"
     return html
 
-def _is_sec_or_col(part: dict) -> bool:
+def _is_sec_or_col(part: dict[str, Any]) -> bool:
     return part["type"] == "section" or part["type"] == "column"
 
 def _is_sec(part: dict) -> bool:
     return part["type"] == "section"
 
-def _classes_from_argdict(part: dict) -> str:
+def _classes_from_argdict(part: dict[str, Any]) -> str:
+    """
+    Returns `part`'s classes in string, separated by space
+    Params:
+    - part: part dictionary
+
+    """
     argdict = part["args"]
-    bg = f"bg{argdict["bg"] if "bg" in argdict.keys() else 1}"
+    if 'bg' in argdict.keys():
+        bg = "bg" + str(argdict['bg'])
+    else:
+        bg = 'bg0'
     col = ""
     if _is_sec_or_col(part):
         n_cols = len([_part for _part in part["data"] if _part["type"] == "column"])
@@ -160,12 +192,20 @@ def _classes_from_argdict(part: dict) -> str:
     partclass = ""
     if part["type"] == "code":
         partclass = "code"
-    return f"{bg} {col} {partclass} {argdict["class"]}"
+    elif part['type'] == 'bq':
+        partclass = 'bq'
+    return f"{bg} {col} {partclass} {argdict['class']}"
 
-def _html_from_header(header: dict, doc: dict) -> str:
+def _html_from_header(header: dict[str, Any], doc: dict[str, Any]) -> str:
+    """
+    Params:
+    - `header`: header dictionary
+    - `doc`: document dictionary
+    Returns: Header HTML as string
+    """
     heading_size = len(re.findall(r"sub", header["type"])) + 1
     tag = f"h{heading_size}"
-    html = f"<{tag} id='{header["id"]}'"
+    html = f"<{tag} id='{header['id']}'"
     styles = _style_html_from_argdict(header["args"])
     txt = header["args"]["label"]
     txt = escape_non_cmds(txt)
@@ -175,19 +215,31 @@ def _html_from_header(header: dict, doc: dict) -> str:
         html += f" style='{styles}'"
     return html + f">{txt}</{tag}>"
 
-def _html_from_code(code: dict, mode="dark") -> str:
+def _html_from_code(code: dict[str, Any], mode=Literal['dark', 'light']) -> str:
+    """
+    Params: 
+    - code: code part's dictionary
+    - mode: document theme
+    Returns: `code` part's HTML as str
+    """
     datastr = code["data"]
     datastr = ht.escape(datastr).replace("\n", "<br>")
     html = f"<div class='{_classes_from_argdict(code)}' data-theme='{mode}'"
-    html += f" id='{code["id"]}'>"
+    html += f" id='{code['id']}'>"
     html += f"<pre>{datastr}</pre></div>"
     return html
 
-def _html_from_list(list_d: dict, doc: dict) -> str:
+def _html_from_list(list_d: dict[str, Any], doc: dict[str, Any]) -> str:
+    """
+    Params:
+    - list_d: list definition dict
+    - doc: document dictionary
+    Returns: HTML of `list_d` object as str
+    """
     dat = list_d["data"]
     # dat = escape_non_cmds(dat).replace("\n", "<br>")
     # dat = apply_text_cmds(dat, doc)
-    html = f"<pre class='list {list_d["args"]["class"]}'>"
+    html = f"<pre class='list {list_d['args']['class']}'>"
 
     n_levels = 3
     escaped_lvls = re.escape(str(n_levels))
@@ -213,7 +265,7 @@ def _html_from_list(list_d: dict, doc: dict) -> str:
                         # reset counter of higher levels
                         for j in range(i + 1, n_levels):
                             order_counter[j] = 0
-                    symbol += f"{max(1,order_counter[i])}{"." if i < level - 1 else ""}"
+                    symbol += f"{max(1,order_counter[i])}{'.' if i < level - 1 else ''}"
             elif list_d["args"]["orderall"]:
                 for i in range(level):
                     if i == level - 1 and i < n_levels:
@@ -234,45 +286,80 @@ def _html_from_list(list_d: dict, doc: dict) -> str:
     return html
 
 
-def _html_from_img(img: dict, doc: dict) -> str:
-    styles = f" style='{_style_html_from_argdict(img["args"])}'"
+def _html_from_img(img: dict[str, Any], doc: dict[str, Any]) -> str:
+    """
+    Params:
+    - img: image dictionary
+    - doc: document dictionary
+    Returns: HTML str from image
+    """
+    styles = f" style='{_style_html_from_argdict(img['args'])}'"
     if styles == " style=''":
         styles = ""
-    imghtml = f"<figure id='{img["id"]}' style='margin: 0;'>"
-    imghtml += f"<img class='{_classes_from_argdict(img)}' src='{img["args"]["src"]}'{styles}>"
+    imghtml = f"<figure id='{img['id']}' style='margin: 0;'>"
+    imghtml += f"<img class='{_classes_from_argdict(img)}' src='{img['args']['src']}'{styles}>"
     captionhtml = ""
     caption = img["args"]["caption"]
     if caption != "":
         caption = escape_non_cmds(caption)
         caption = apply_text_cmds(caption, doc)
         captionhtml = (f"<figcaption style='margin-top: -1%'>"
-            +f"{"<i>" if img["args"]["italicize"] else ""}{caption}"
-            +f"{"</i>" if img["args"]["italicize"] else ""}</figcaption>")
+            +f"{'<i>' if img['args']['italicize'] else ''}{caption}"
+            +f"{'</i>' if img['args']['italicize'] else ''}</figcaption>")
     captionhtml += "</figure>"
     return imghtml + captionhtml
 
-def _html_from_text(part: dict, doc: dict) -> str:
+def _html_from_bq(part: dict[str, Any], mode=Literal['dark', 'light']) -> str:
+    """
+    Params:
+    - part: blockquote part's dictionary
+    - doc: document dictionary
+    Returns: HTML str from `part`
+    """
+    datastr = part['data']
+    datastr = ht.escape(datastr).replace("\n", "<br>")
+    if part['args']['italicize']:
+        datastr = '<i>' + datastr + '</i>'
+    html = f"<blockquote class='{_classes_from_argdict(part)}' data-theme='{mode}'"
+    html += f">{datastr}</blockquote>"
+    return html
+
+def _html_from_text(part: dict[str, Any], doc: dict[str, Any]) -> str:
+    """
+    Params:
+    - part: text part's dictionary
+    - doc: document dictionary
+    Returns: HTML str from `part`
+    """
     datastr = part["data"]
     datastr = escape_non_cmds(datastr).replace("\n","<br>")
     datastr = apply_text_cmds(datastr, doc)
-    return f"<p class='{part["args"]["class"]}' id='{part["id"]}'>" + datastr + "</p>"
+    return f"<p class='{part['args']['class']}' id='{part['id']}'>" + datastr + "</p>"
 
 def _empty_or_ws_str(string: str) -> bool:
     return re.match(r"^\s?$", string)
 
-def _html_from_container(section: dict, mode="dark", doc:dict=None) -> str:
+def _html_from_container(
+        section: dict[str, Any], 
+        mode=Literal['dark', 'light'], 
+        doc: Optional[dict[str, Any]]=None) -> str:
     """
-        args:
-            - section: dictionary for a section or column object
+    Recursively build HTML string from contained objects in `section`,
+    including styling, classes, theming
+    Params:
+    - section: dictionary for a section or column object
+    - mode: document theme
+    - doc: if left None, `section` is treated as document
+    Returns: HTML str
     """
     if doc is None:
         doc = section
 
-    html = f"<div id='{section["id"]}' "
-    cols = [part for part in section["data"] if _is_sec(part)]
+    html = f"<div id='{section['id']}' "
+    cols = [part for part in section['data'] if _is_sec(part)]
     html += f"class='{_classes_from_argdict(section)}'"
     html += f" data-theme='{mode}'"
-    styles = _style_html_from_argdict(section["args"])
+    styles = _style_html_from_argdict(section['args'])
     if not _empty_or_ws_str(styles):
         html += f" style='{styles}' "
     html += ">"
@@ -290,6 +377,8 @@ def _html_from_container(section: dict, mode="dark", doc:dict=None) -> str:
                 html += _html_from_img(part, doc)
             case "list":
                 html += _html_from_list(part, doc)
+            case 'bq':
+                html += _html_from_bq(part, mode)
     html += "</div>"
     return html
 
@@ -303,6 +392,9 @@ def _get_html_theme_button(mode: str):
 
 
 def _get_local_js_imports():
+    """
+    Returns script tags in a string referencing local files
+    """
     paths = [
         os.path.join(scr_dir, "js/toggle_theme.js")
     ]
@@ -311,10 +403,11 @@ def _get_local_js_imports():
         imp +=  f"<script>{open(path).read()}</script>"
     return imp
 
-def html_from_dict(section: dict, mode="dark") -> str:
+def html_from_dict(section: dict[str, Any], mode="dark") -> str:
     """
-        args:
-            - section: dictionary for a section or column object
+    Params:
+    - `section`: dictionary for a section or column object
+    Returns: Ready-to-build HTML string including html tags, etc.
     """
     html = "<!DOCTYPE html><html><head>"
     style_path = os.path.abspath(os.path.join(scr_dir, "base_styles.css"))
@@ -328,6 +421,21 @@ def html_from_dict(section: dict, mode="dark") -> str:
     return html
 
 def create_doc_item(tag: str, data: str="") -> dict:
+    """
+    If `tag` is 'section' or 'column', data is empty list (to
+    store other doc items
+
+    Doc dict structure:
+    - 'type': str,
+    - 'id': int,
+    - 'args': dict[str, Any],
+    - 'data': `data`
+    Params:
+    - tag: string literal type of object ('section', 'header', etc.)
+    - data: data string can be used if `tag` is not 'section' or 'column'
+
+    Returns: doc item corresponding to `tag`, with appended `data`.
+    """
     global TYPES
     t_idx = [item["type"] for item in TYPES].index(tag)
     type_info = TYPES[t_idx]
@@ -341,7 +449,10 @@ def create_doc_item(tag: str, data: str="") -> dict:
     }
     return item_dict
 
-def process_tag(tagstr: str, doc: dict, last_added_item: dict | None) -> dict:
+def process_tag(tagstr: str, doc: dict[str, Any], last_added_item: Optional[dict[str, Any]]) -> dict:
+    """
+    
+    """
     global TYPES
     tag = tagstr[1:-1]
     item_dict = create_doc_item(tag)
@@ -419,7 +530,7 @@ def add_to_doc(itemdesc: dict, doc: dict, last_added: dict | None) -> None:
 
     res = search_section(doc, last_added["id"])
     if res is None:
-        raise ValueError(f"Object with id {last_added["id"]} not found")
+        raise ValueError(f"Object with id {last_added['id']} not found")
     _, parent = res
     if _is_sec(itemdesc):
         # if new item is section, append new section to doc
@@ -452,7 +563,7 @@ def process_data(datastr: str, doc: dict, last_added_item: dict) -> dict | None:
         Returns: created text dict or None
     """
     if (not last_added_item is None 
-        and last_added_item["type"] in ["code", "list"] 
+        and last_added_item["type"] in ["code", "list", 'bq'] 
         and last_added_item["data"] == ""):
         datastr = datastr[1:-1].strip()
         last_added_item["data"] = datastr
@@ -482,23 +593,23 @@ def apply_text_cmds(text: str, doc: dict) -> str:
                     if sres is None:
                         raise ValueError(f"Can't find doclink: {link}")
                     linkdest, _ = sres
-                    link = f"#{linkdest["id"]}"
+                    link = f"#{linkdest['id']}"
+                _blank = f" target='_blank'" if link[0] != "#" else ""
                 text = text.replace(cdict["string"], 
                     f"<a class='link' href='{link}'"+
-                    f"{f" target='_blank'" if link[0] != "#" else ""}"+
-                    f">{cdict["arg2"] if not cdict["arg2"] in ["", None] else link}"+
+                    _blank +
+                    f">{cdict['arg2'] if not cdict['arg2'] in ['', None] else link}"+
                     "</a>")
             case "bold":
                 text = text.replace(cdict["string"],
-                    f"<strong>{cdict["arg1"]}</strong>")
+                    f"<strong>{cdict['arg1']}</strong>")
             case "italic":
                 text = text.replace(cdict["string"],
-                    f"<i>{cdict["arg1"]}</i>")
+                    f"<i>{cdict['arg1']}</i>")
             case "textcode":
                 text = text.replace(cdict["string"],
                     "<span class='textcode' style='display:inline'>"+
-                    f"{cdict["arg1"] if (not cdict["arg1"] in ["", None]) else (cdict["arg2"] 
-                        if not cdict["arg2"] in ["", None] else "")}</span>")
+                    f"{cdict['arg1'] if (not cdict['arg1'] in ['', None]) else ''}</span>")
             case "showarg":
                 uid = cdict["arg1"]
                 argname = cdict["arg2"]
@@ -506,12 +617,12 @@ def apply_text_cmds(text: str, doc: dict) -> str:
                 if res is None:
                     raise ValueError(f"uid not found: {uid}")
                 if not argname in res[0]["args"].keys():
-                    raise ValueError(f"Argument {argname} not in {res[0]["type"]} (uid {uid})")
-                repl_txt = res[0]["args"][argname]
+                    raise ValueError(f"Argument {argname} not in {res[0]['type']} (uid {uid})")
+                repl_txt = res[0]['args'][argname]
                 # repl_txt = escape_non_cmds(repl_txt)
                 # repl_txt = apply_text_cmds(repl_txt, doc)
                 if argname == "label":
-                    repl_txt = f"<a class='link' href='#{res[0]["id"]}'>{repl_txt}</a>"
+                    repl_txt = f"<a class='link' href='#{res[0]['id']}'>{repl_txt}</a>"
                 text = text.replace(cdict["string"],
                     repl_txt)
             case "tableofcontents":

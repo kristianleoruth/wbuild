@@ -4,6 +4,7 @@
 \tableofcontents
 
 [subheader][numbered=True,label=Getting started, uid=getting_started]
+
 This is a simple custom markup language (inspired by Markdown). The script \textcode{wbuild.py} is a converter allowing one to quickly build a site from a markup file. The structure of the markup document is a series of tags with text in between. These tags represent a section, image, text, header, subheader, etc, and are supplemented with arguments given in extra square brackets following the tag. Download the necessary files \link{https://github.com/kristianleoruth/wbuild}{here.}
 
 To convert a text document to an html file, run the command:
@@ -15,7 +16,7 @@ python3 wbuild.py "path_to_doc.txt" "output_path.html" -mode -view
 // Demo (build this website):
 python3 wbuild.py
 ]
-Note that code blocks may have comments denoted by \textcode{//}, which are not supported in the markup language. Therefore comments should only be taken for illustration, not that they are "correct" to be there.
+Note that code blocks in the examples may have comments denoted by \textcode{//}, which are not supported in the markup language.
 
 For examples of the markup language, see the \showarg{examples}{label} section.
 
@@ -236,6 +237,35 @@ Example use:
     src=./path_to_img.gif, 
     maxwidth=50%, 
     caption=This caption and image will be centered due to the section argument.
+]
+]
+
+[section]
+[subheader][label=Blockquotes, uid=bqs_info]
+Blockquotes can be added using \textcode{[bq]}. 
+[bq][
+    This text is indented using <blockquote>
+]
+
+[section][notopmarg=True]
+[column]
+Definition:
+[code][
+    "type": "bq", # blockquote
+    "args": {
+        "label": "",
+        "italicize": True,
+        "class": "",
+        "notopmarg": False,
+        "uid": "",
+    }
+]
+[column]
+Example use:
+[code][
+This text is normal.
+[bq][
+    This text will be quoted.
 ]
 ]
 
