@@ -4,6 +4,7 @@ import html as ht
 import sys
 import os
 from typing import Optional, Literal, Any
+import argparse
 
 scr_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -137,7 +138,7 @@ def build_doc_dict(txt: str) -> dict:
                 # copy text into data
             tag = delete_leading_whitespace(part)
             last_added_item = process_tag(tag, doc, last_added_item)
-        elif is_args(part):
+        elif is_args(part, last_added_item) :
             process_args(part, last_added_item)
         else:
             itm = process_data(part, doc, last_added_item)
@@ -672,15 +673,116 @@ def is_type_tag(text: str) -> bool:
     nows = re.sub(r"\s", "", match.string)
     return nows[1:-1] in [item["type"] for item in TYPES]
 
-def is_args(text: str) -> bool:
-    argptn = r'^\[\s*([\w-]+=[^\[\],]+)(?:\s*,\s*([\w-]+=[^\[\],]+))*\s*\]$'
-    return re.match(argptn, text)
+def is_args(text: str, last_item: dict[str, Any] = None) -> bool:
+    if last_item is not None:
+        # t_idx = [item["type"] for item in TYPES].index(last_item['type'])
+        arg_keys = last_item['args'].keys()
+    if not text.startswith('[') or not text.endswith(']'):
+        return False
+
+    content = text[1:-1].strip()
+    if not content:
+        return False
+
+    i = 0
+    length = len(content)
+
+    while i < length:
+        # Skip whitespace
+        while i < length and content[i].isspace():
+            i += 1
+
+        # Extract key
+        key_start = i
+        while i < length and (content[i].isalnum() or content[i] == '_'
+                              or content[i] == '-'):
+            i += 1
+        key = content[key_start:i].strip()
+        if not key or (last_item is not None and not key in arg_keys):
+            return False
+
+        # Skip whitespace and expect '='
+        while i < length and content[i].isspace():
+            i += 1
+        if i >= length or content[i] != '=':
+            return False
+        i += 1
+
+        # Skip whitespace before value
+        while i < length and content[i].isspace():
+            i += 1
+
+        # Extract value until a comma that is likely followed by another key=
+        value_start = i
+        while i < length:
+            if content[i] == ',':
+                # Peek ahead to see if it's followed by a valid key=
+                j = i + 1
+                while j < length and content[j].isspace():
+                    j += 1
+                k = j
+                while k < length and (content[k].isalnum() or content[k] == '_'
+                                      or content[k] == '-'):
+                    k += 1
+                while k < length and content[k].isspace():
+                    k += 1
+                if k < length and content[k] == '=':
+                    break
+            i += 1
+
+        if value_start == i:
+            return False  # Empty value
+
+        # Skip past comma
+        if i < length and content[i] == ',':
+            i += 1
+
+    return True
 
 def parse_args(text: str) -> dict | None:
-    pattern = r'(\w+)=([^,\]]+)'
-    matches = re.findall(pattern, text)
+    if not text.startswith('[') or not text.endswith(']'):
+        return None
 
-    result = {key: value for key, value in matches}
+    content = text[1:-1].strip()
+    result = {}
+    i = 0
+    length = len(content)
+
+    while i < length:
+        # Skip whitespace
+        while i < length and content[i].isspace():
+            i += 1
+        
+        # Extract key
+        key_start = i
+        while i < length and content[i] != '=':
+            i += 1
+        key = content[key_start:i].strip()
+
+        # Skip '=' and surrounding spaces
+        i += 1
+        while i < length and content[i].isspace():
+            i += 1
+
+        # Extract value
+        value_start = i
+        while i < length:
+            if content[i] == ',':
+                # Check if the comma is part of a key-value separator
+                # Look ahead to see if this comma is followed by a key=
+                j = i + 1
+                while j < length and content[j].isspace():
+                    j += 1
+                if j < length and '=' in content[j:]:
+                    break
+            i += 1
+        value = content[value_start:i].strip()
+
+        result[key] = value
+
+        # Skip the comma and continue
+        i += 1
+
     return result
 
 def format_whitespaces(text: str) -> str:
@@ -865,15 +967,18 @@ if __name__ == "__main__":
     save_path = f"{scr_dir}/output.html"
     mode = "light"
     view_built_site = False
-    if len(sys.argv) > 1:
-        path_to_file = sys.argv[1]
-    if len(sys.argv) > 2:
-        save_path = sys.argv[2]
-        for i in range(3, len(sys.argv)):
-            if sys.argv[i].lower() in ["-light", "-dark"]:
-                mode = sys.argv[i][1:]
-            elif sys.argv[i].lower() == "-view":
-                view_built_site = True
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-infile", "-in", "-i", type=str, default=path_to_file)
+    parser.add_argument("-out", "-o", type=str, default=save_path)
+    parser.add_argument("--view", action="store_true")
+    parser.add_argument("--mode", type=str, default='light')
+    args = parser.parse_args()
+
+    path_to_file = args.infile
+    save_path = args.out
+    mode = args.mode
+    view_built_site = args.view
 
     sample_txt = open(path_to_file, "r").read()
     save_to = open(save_path, "w")
