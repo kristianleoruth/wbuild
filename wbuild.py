@@ -1023,6 +1023,8 @@ if __name__ == "__main__":
     html = html_from_dict(doc, mode=mode, footer_cmp_mode=(args.footer != ""))
     if args.footer != "":
         html = create_and_append_footer(args.footer, html)
+    # soup = BeautifulSoup(html, 'html.parser')
+    # html = str(soup.prettify('utf-8'), 'utf-8');
     save_to.write(html)
     if view_built_site:
         os.system(f"open '{save_path}'")
