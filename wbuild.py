@@ -433,15 +433,16 @@ def _get_local_js_imports():
         imp +=  f"<script>{open(path).read()}</script>"
     return imp
 
-def html_from_dict(section: dict[str, Any], mode="dark", footer_cmp_mode=False) -> str:
+def html_from_dict(section: dict[str, Any], mode="dark", footer_cmp_mode=False, title="Wbuild Page") -> str:
     """
     Params:
     - `section`: dictionary for a section or column object
     - `mode`: page theme
     - `footer_cmp_mode`: set body to be grid of two for footer
+    - `title`: page title (tab name)
     Returns: Ready-to-build HTML string including html tags, etc.
     """
-    html = "<!DOCTYPE html><html><head>"
+    html = f"<!DOCTYPE html><html><head><title>{title}</title>"
     style_path = os.path.abspath(os.path.join(scr_dir, "base_styles.css"))
     html += "<style>" + open(f"{style_path}").read() + "</style>"
     html += "<meta charset='UTF-8'></head>"
@@ -1005,6 +1006,7 @@ if __name__ == "__main__":
     parser.add_argument("--view", action="store_true", help="Open on compilation")
     parser.add_argument("--mode", type=str, default='light', help='File theme [\'light\', \'dark\']')
     parser.add_argument("--footer", "-f", type=str, help='Optional footer file path', default="")
+    parser.add_argument("--title", "-t", type=str, default="Wbuild page", help='Optional page title (tab name)')
     args = parser.parse_args()
 
     path_to_file = args.infile
@@ -1015,7 +1017,7 @@ if __name__ == "__main__":
     sample_txt = open(path_to_file, "r").read()
     save_to = open(save_path, "w")
     doc = build_doc_dict(sample_txt)
-    html = html_from_dict(doc, mode=mode, footer_cmp_mode=(args.footer != ""))
+    html = html_from_dict(doc, mode=mode, footer_cmp_mode=(args.footer != ""), title=args.title)
     if args.footer != "":
         html = create_and_append_footer(args.footer, html)
     # soup = BeautifulSoup(html, 'html.parser')
