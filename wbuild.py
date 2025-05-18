@@ -396,25 +396,20 @@ def _bsoup_from_footer(fpath: str):
     fhtml_txt = _html_from_container(fsec, 'footer')
     fhtml = BeautifulSoup(fhtml_txt, 'html.parser')
 
-    # print(fhtml)
     container = fhtml.find('div')
     container['class'] = container.get('class', []) + ['footer-parent']
     return container
 
 def create_and_append_footer(fpath: str, document_html: str):
     doc = BeautifulSoup(document_html, 'html.parser')
-    body = doc.body
+    body = doc.body.find('div')
     footer_div = _bsoup_from_footer(fpath)
-    print(footer_div)
     if body and footer_div:
         body.append(footer_div)
-        print("\n")
-        print(body)
     else:
         raise Exception("Error creating footer or parsing body")
 
     result = str(doc)
-    # print(result)
     return result
 
 def _get_html_theme_button(mode: str):

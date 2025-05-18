@@ -21,11 +21,11 @@ body[data-theme="light"] .bg2 {
     background-color: #ddd;
 }
 body[data-theme="dark"] {
-    background-color: #0b192c;
+    background-color: #1c2021;
     color: #fff;
 }
 body[data-theme="dark"] .bg2 {
-    background-color: #1E3E62;
+    background-color: #292b2c;
     color: #bbb;
 }
 
@@ -35,7 +35,7 @@ body[data-theme="dark"] .bg2 {
 
 .main {
     flex-grow: 1;
-    margin: 10% 20%;
+    padding: 0 20%;
 }
 
 .columns2 {
@@ -101,11 +101,10 @@ pre.list {
     font-size: small;
     bottom: 0;
     color: rgb(201, 210, 211);
-    width: 100vw;
-    max-width: 100%;
+    /* width: 100%; */
+    /* max-width: 100%; */
     /* left: 50%; */
     /* right: 50%; */
-    bottom: 0;
     /* position: relative; */
     padding: 2% 5%;
     margin-bottom: -13%;
