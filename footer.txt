@@ -1,0 +1,22 @@
+[section]
+[column]
+[subheader][label=Footers]
+This is an example footer, which can be created by passing the footer file path as the \textcode{-footer} argument to \textcode{wbuild.py}. This allows easy reuse of footers, which generally are the same across different pages of a website.
+[column]
+This website was created with \link{https://www.kristianleoruth.github.io/wbuild}{wbuild}, a markdown-style language.
+[list][align=left][
+-) Author: Kristian Ruth (\link{https://github.com/kristianleoruth}{github}, \link{https://sites.google.com/view/kristian-ruth/home}{website})
+-) Last updated: 17 May 2025
+]
+[column]
+Example:
+[code][
+[section]
+[column]
+[subheader][label=Footer Column 1]
+This text will be in the first column
+
+[column]
+[subheader][label=Footer Column 1]
+You can still use in-text commands like links.
+]

@@ -1,0 +1,28 @@
+(Planned) v1.1:
+Features: 
+- Footer: pass additional file which will be made into a footer on infile
+
+v1.0.1:
+Tags:
+- bq
+
+Fixes:
+- Updated parsin
+
+v1.0:
+Tags:
+- section
+- column
+- sub/sub/header
+- text
+- code
+- list
+- img
+
+Commands:
+- \bold{text to bold}
+- \italic{text to italicize}
+- \link{url}{text: opt.}
+- \textcode{inline code}
+- \showarg{uid}{argname}
+- \tableofcontents
