@@ -1,11 +1,31 @@
 body {
-    padding: 5% 20%;
     font-family: Tahoma, sans-serif;
+    width: 100%;
+    max-width: 100%; 
+    padding: 0;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    min-height: 100vw;
 }
 
+body.footer-compatible {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    min-height: 100vh;
+}
+
+*, *::before, *::after {
+    box-sizing: inherit;
+}
+
+.main {
+    flex-grow: 1;
+    margin: 10% 20%;
+}
 
 .columns2 {
     display: grid;
+    overflow: wrap;
     grid-template-columns: 1fr 1fr;
     gap: 3%;
 }
@@ -55,6 +75,24 @@ pre.list {
     font-family: inherit;
     margin: inherit;
     unicode-bidi: inherit;
+    white-space: pre-wrap;
+}
+
+.footer-parent {
+    background-color: rgb(32, 36, 41);
+    font-size: small;
+    bottom: 0;
+    color: rgb(201, 210, 211);
+    width: 100vw;
+    max-width: 100%;
+    /* left: 50%; */
+    /* right: 50%; */
+    /* bottom: 0; */
+    /* position: relative; */
+    padding: 2% 5%;
+    /* margin-left: -50vw; */
+    /* margin-right: -50vw; */
+    box-sizing: border-box;
 }
 
 pre.code {

@@ -5,6 +5,7 @@ import sys
 import os
 from typing import Optional, Literal, Any
 import argparse
+from bs4 import BeautifulSoup
 
 scr_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -88,6 +89,7 @@ TYPES = [
             "class": "",
             "notopmarg": False,
             "uid": "",
+            'align': 'left',
         }
     },
     {
@@ -240,7 +242,9 @@ def _html_from_list(list_d: dict[str, Any], doc: dict[str, Any]) -> str:
     dat = list_d["data"]
     # dat = escape_non_cmds(dat).replace("\n", "<br>")
     # dat = apply_text_cmds(dat, doc)
-    html = f"<pre class='list {list_d['args']['class']}'>"
+    html = f"<pre class='list {list_d['args']['class']}' "
+    styles = _style_html_from_argdict(list_d['args'])
+    html += f"style='{styles}'>"
 
     n_levels = 3
     escaped_lvls = re.escape(str(n_levels))
@@ -275,14 +279,14 @@ def _html_from_list(list_d: dict[str, Any], doc: dict[str, Any]) -> str:
                         for j in range(i + 1, n_levels):
                             order_counter[j] = 0
             presequence = prespace + symbol + " "
-            presequence = ht.escape(presequence)
+            # presequence = ht.escape(presequence)
             sd = escape_non_cmds(sd)
             sd = apply_text_cmds(sd, doc)
             if not first_line:
                 html += "<br>"
             else:
                 first_line = False
-            html += ht.escape(presequence) + sd
+            html += presequence + sd
     html += "</pre>"
     return html
 
@@ -357,10 +361,11 @@ def _html_from_container(
         doc = section
 
     html = f"<div id='{section['id']}' "
-    cols = [part for part in section['data'] if _is_sec(part)]
+    # cols = [part for part in section['data'] if _is_sec(part)]
     html += f"class='{_classes_from_argdict(section)}'"
-    html += f" data-theme='{mode}'"
+    html += f" data-theme='{mode}' data-type='sec/col'"
     styles = _style_html_from_argdict(section['args'])
+    styles += "overflow:wrap;"
     if not _empty_or_ws_str(styles):
         html += f" style='{styles}' "
     html += ">"
@@ -383,6 +388,35 @@ def _html_from_container(
     html += "</div>"
     return html
 
+def _bsoup_from_footer(fpath: str):
+    ffile = open(fpath)
+    ftxt = ffile.read()
+    ffile.close()
+    fsec = build_doc_dict(ftxt)
+    fhtml_txt = _html_from_container(fsec, 'footer')
+    fhtml = BeautifulSoup(fhtml_txt, 'html.parser')
+
+    # print(fhtml)
+    container = fhtml.find('div')
+    container['class'] = container.get('class', []) + ['footer-parent']
+    return container
+
+def create_and_append_footer(fpath: str, document_html: str):
+    doc = BeautifulSoup(document_html, 'html.parser')
+    body = doc.body
+    footer_div = _bsoup_from_footer(fpath)
+    print(footer_div)
+    if body and footer_div:
+        body.append(footer_div)
+        print("\n")
+        print(body)
+    else:
+        raise Exception("Error creating footer or parsing body")
+
+    result = str(doc)
+    # print(result)
+    return result
+
 def _get_html_theme_button(mode: str):
     icon = f"https://raw.githubusercontent.com/kristianleoruth/wbuild/refs/heads/main/assets/moon.png"
     if mode == "dark":
@@ -404,21 +438,23 @@ def _get_local_js_imports():
         imp +=  f"<script>{open(path).read()}</script>"
     return imp
 
-def html_from_dict(section: dict[str, Any], mode="dark") -> str:
+def html_from_dict(section: dict[str, Any], mode="dark", footer_cmp_mode=False) -> str:
     """
     Params:
     - `section`: dictionary for a section or column object
+    - `mode`: page theme
+    - `footer_cmp_mode`: set body to be grid of two for footer
     Returns: Ready-to-build HTML string including html tags, etc.
     """
     html = "<!DOCTYPE html><html><head>"
     style_path = os.path.abspath(os.path.join(scr_dir, "base_styles.css"))
     html += "<style>" + open(f"{style_path}").read() + "</style>"
-    html += "</head>"
-    html += f"<body class='bg1' data-theme='{mode}'x>"
+    html += "<meta charset='UTF-8'></head>"
+    html += f"<body class='bg1{' footer-compatible' if footer_cmp_mode else ''}' data-theme='{mode}'x><div class='main'>"
     html += _html_from_container(section, mode)
     html += _get_html_theme_button(mode)
     html += _get_local_js_imports()
-    html += "</body></html>"
+    html += "</div></body></html>"
     return html
 
 def create_doc_item(tag: str, data: str="") -> dict:
@@ -969,10 +1005,11 @@ if __name__ == "__main__":
     view_built_site = False
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-infile", "-in", "-i", type=str, default=path_to_file)
-    parser.add_argument("-out", "-o", type=str, default=save_path)
-    parser.add_argument("--view", action="store_true")
-    parser.add_argument("--mode", type=str, default='light')
+    parser.add_argument("-infile", "-in", "-i", type=str, default=path_to_file, help="Main file wbuild code")
+    parser.add_argument("-out", "-o", type=str, default=save_path, help="HTML output path")
+    parser.add_argument("--view", action="store_true", help="Open on compilation")
+    parser.add_argument("--mode", type=str, default='light', help='File theme [\'light\', \'dark\']')
+    parser.add_argument("--footer", "-f", type=str, help='Optional footer file path', default="")
     args = parser.parse_args()
 
     path_to_file = args.infile
@@ -983,7 +1020,9 @@ if __name__ == "__main__":
     sample_txt = open(path_to_file, "r").read()
     save_to = open(save_path, "w")
     doc = build_doc_dict(sample_txt)
-    html = html_from_dict(doc, mode=mode)
+    html = html_from_dict(doc, mode=mode, footer_cmp_mode=(args.footer != ""))
+    if args.footer != "":
+        html = create_and_append_footer(args.footer, html)
     save_to.write(html)
     if view_built_site:
         os.system(f"open '{save_path}'")
