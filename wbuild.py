@@ -1,7 +1,6 @@
 import re
 import time
 import html as ht
-import sys
 import os
 from typing import Optional, Literal, Any
 import argparse
@@ -433,7 +432,13 @@ def _get_local_js_imports():
         imp +=  f"<script>{open(path).read()}</script>"
     return imp
 
-def html_from_dict(section: dict[str, Any], mode="dark", footer_cmp_mode=False, title="Wbuild Page") -> str:
+def html_from_dict(
+        section: dict[str, Any], 
+        mode='dark', 
+        footer_cmp_mode=False, 
+        title='Wbuild Page',
+        favicon='',
+    ) -> str:
     """
     Params:
     - `section`: dictionary for a section or column object
@@ -443,14 +448,16 @@ def html_from_dict(section: dict[str, Any], mode="dark", footer_cmp_mode=False, 
     Returns: Ready-to-build HTML string including html tags, etc.
     """
     html = f"<!DOCTYPE html><html><head><title>{title}</title>"
+    if favicon != '':
+        html += f"<link rel='icon' href='{favicon}'>"
     style_path = os.path.abspath(os.path.join(scr_dir, "base_styles.css"))
-    html += "<style>" + open(f"{style_path}").read() + "</style>"
-    html += "<meta charset='UTF-8'></head>"
+    html += '<style>' + open(f"{style_path}").read() + '</style>'
+    html += '<meta charset=\'UTF-8\'></head>'
     html += f"<body class='bg1{' footer-compatible' if footer_cmp_mode else ''}' data-theme='{mode}'x><div class='main'>"
     html += _html_from_container(section, mode)
     html += _get_html_theme_button(mode)
     html += _get_local_js_imports()
-    html += "</div></body></html>"
+    html += '</div></body></html>'
     return html
 
 def create_doc_item(tag: str, data: str="") -> dict:
@@ -1007,6 +1014,7 @@ if __name__ == "__main__":
     parser.add_argument("--mode", type=str, default='light', help='File theme [\'light\', \'dark\']')
     parser.add_argument("--footer", "-f", type=str, help='Optional footer file path', default="")
     parser.add_argument("--title", "-t", type=str, default="Wbuild page", help='Optional page title (tab name)')
+    parser.add_argument("--icon", type=str, default='', help='Page icon path')
     args = parser.parse_args()
 
     path_to_file = args.infile
@@ -1017,7 +1025,7 @@ if __name__ == "__main__":
     sample_txt = open(path_to_file, "r").read()
     save_to = open(save_path, "w")
     doc = build_doc_dict(sample_txt)
-    html = html_from_dict(doc, mode=mode, footer_cmp_mode=(args.footer != ""), title=args.title)
+    html = html_from_dict(doc, mode=mode, footer_cmp_mode=(args.footer != ""), title=args.title, favicon=args.icon)
     if args.footer != "":
         html = create_and_append_footer(args.footer, html)
     # soup = BeautifulSoup(html, 'html.parser')
